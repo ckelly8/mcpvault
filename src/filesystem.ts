@@ -222,11 +222,11 @@ export class FileSystemService {
       };
     }
 
-    if (!newString) {
+    if (newString === undefined || newString === null) {
       return {
         success: false,
         path,
-        message: 'newString cannot be empty'
+        message: 'newString is required'
       };
     }
 

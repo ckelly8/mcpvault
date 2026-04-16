@@ -197,11 +197,11 @@ export class FileSystemService {
                 message: 'oldString cannot be empty'
             };
         }
-        if (!newString) {
+        if (newString === undefined || newString === null) {
             return {
                 success: false,
                 path,
-                message: 'newString cannot be empty'
+                message: 'newString is required'
             };
         }
         // Validate that oldString and newString are different
