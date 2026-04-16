@@ -88,12 +88,13 @@ export function createServer(vaultPath: string, options: CreateServerOptions = {
         },
         {
           name: "delete_note",
-          description: "Delete a note from the Obsidian vault (requires confirmation)",
+          description: "Delete a note from the Obsidian vault (requires confirmation). Supports permanent delete, vault trash, or system trash.",
           inputSchema: {
             type: "object",
             properties: {
               path: { type: "string", description: "Path to the note relative to vault root" },
-              confirmPath: { type: "string", description: "Confirmation: must exactly match the path parameter to proceed with deletion" }
+              confirmPath: { type: "string", description: "Confirmation: must exactly match the path parameter to proceed with deletion" },
+              trashMode: { type: "string", enum: ["none", "local", "system"], description: "Deletion mode: 'none' = permanent delete (default), 'local' = move to .trash inside vault, 'system' = move to OS trash", default: "none" }
             },
             required: ["path", "confirmPath"]
           }
@@ -282,7 +283,8 @@ export function createServer(vaultPath: string, options: CreateServerOptions = {
         case "delete_note": {
           const result = await fileSystem.deleteNote({
             path: trimmedArgs.path,
-            confirmPath: trimmedArgs.confirmPath
+            confirmPath: trimmedArgs.confirmPath,
+            trashMode: trimmedArgs.trashMode
           });
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }],

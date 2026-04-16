@@ -1,6 +1,7 @@
 import { join, resolve, relative, dirname } from 'path';
 import { readdir, stat, readFile, writeFile, unlink, mkdir, access, rename, copyFile } from 'node:fs/promises';
 import { constants, realpathSync } from 'node:fs';
+import trash from 'trash';
 import { FrontmatterHandler } from './frontmatter.js';
 import { PathFilter } from './pathfilter.js';
 import { generateObsidianUri } from './uri.js';
@@ -386,7 +387,7 @@ export class FileSystemService {
   }
 
   async deleteNote(params: DeleteNoteParams): Promise<DeleteResult> {
-    const { path, confirmPath } = params;
+    const { path, confirmPath, trashMode = 'none' } = params;
 
     // Confirmation check - paths must match exactly
     if (path !== confirmPath) {
@@ -415,6 +416,44 @@ export class FileSystemService {
           success: false,
           path: path,
           message: `Cannot delete: ${path} is not a file`
+        };
+      }
+
+      if (trashMode === 'local') {
+        const trashDir = join(this.vaultPath, '.trash');
+        const trashPath = join(trashDir, path);
+
+        // Ensure trash directory exists
+        await mkdir(dirname(trashPath), { recursive: true });
+
+        // Handle collisions by appending a timestamp
+        let finalTrashPath = trashPath;
+        try {
+          await access(finalTrashPath, constants.F_OK);
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const ext = path.endsWith('.md') ? '.md' : '';
+          const base = ext ? path.slice(0, -ext.length) : path;
+          const collidedPath = `${base}-${timestamp}${ext}`;
+          finalTrashPath = join(trashDir, collidedPath);
+        } catch {
+          // File does not exist in trash, no collision
+        }
+
+        await rename(fullPath, finalTrashPath);
+
+        return {
+          success: true,
+          path: path,
+          message: `Successfully moved note to vault trash: ${path}`
+        };
+      }
+
+      if (trashMode === 'system') {
+        await trash(fullPath);
+        return {
+          success: true,
+          path: path,
+          message: `Successfully moved note to system trash: ${path}`
         };
       }
 

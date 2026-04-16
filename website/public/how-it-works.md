@@ -46,7 +46,7 @@ Practical prompts you can try with your AI assistant and MCPVault.
 | write_note | Create or overwrite a note (supports overwrite, append, prepend modes) |
 | patch_note | Efficient partial update via find-and-replace |
 | list_directory | List files and folders in the vault (includes non-note filenames) |
-| delete_note | Delete a note (requires path confirmation) |
+| delete_note | Delete a note with optional soft-delete: permanent, vault trash, or system trash |
 | search_notes | Search by note name or content across the vault |
 | move_note | Move or rename a note |
 | move_file | Move or rename any file (binary-safe, file-only, requires path confirmation) |

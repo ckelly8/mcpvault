@@ -1,6 +1,6 @@
 {
   "name": "@bitbonsai/mcpvault",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Universal AI bridge for Obsidian vaults - connect any MCP-compatible assistant",
   "homepage": "https://mcpvault.org",
   "author": "bitbonsai",
@@ -38,6 +38,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
     "gray-matter": "^4.0.3",
+    "trash": "^10.1.1",
     "yaml": "^2.8.3"
   },
   "devDependencies": {

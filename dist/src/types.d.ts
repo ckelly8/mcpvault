@@ -25,6 +25,7 @@ export interface PatchNoteResult {
 export interface DeleteNoteParams {
     path: string;
     confirmPath: string;
+    trashMode?: 'none' | 'local' | 'system';
 }
 export interface DeleteResult {
     success: boolean;

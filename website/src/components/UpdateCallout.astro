@@ -16,7 +16,7 @@ import { Rocket } from 'lucide-react';
             <h3 class="text-lg font-semibold text-foreground flex items-center gap-2">
               Recent Updates
               <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-accent border border-accent/30">
-                v0.11.0
+                v0.11.2
               </span>
             </h3>
             <button
@@ -44,13 +44,17 @@ import { Rocket } from 'lucide-react';
           </div>
           <div class="mb-4">
             <p class="text-muted-foreground leading-relaxed">
-              <span class="font-medium text-foreground">v0.11.1 (April 2026):</span> Frontmatter updates now use AST-aware YAML preservation. Unmodified fields keep their original formatting: plain dates stay as <code>YYYY-MM-DD</code>, quoted strings keep their quotes, and <code>HH:MM</code> values are no longer misread as sexagesimal integers.
-              (<a href="https://github.com/bitbonsai/mcpvault/issues/77" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-2 transition-colors">#77</a>)
+              <span class="font-medium text-foreground">v0.11.2 (April 2026):</span> <code>delete_note</code> now supports soft-delete with <code>trashMode</code>: <code>none</code> (permanent), <code>local</code> (move to <code>.trash/</code> inside vault), or <code>system</code> (OS trash).
+              (<a href="https://github.com/bitbonsai/mcpvault/issues/91" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-2 transition-colors">#91</a>)
             </p>
           </div>
 
           <div id="older-updates" class="older-updates is-collapsed" data-updates-panel>
             <ul class="text-muted-foreground space-y-2">
+              <li>
+                <span class="font-medium text-foreground">v0.11.1 (April 2026):</span> Frontmatter updates now use AST-aware YAML preservation. Unmodified fields keep their original formatting: plain dates stay as <code>YYYY-MM-DD</code>, quoted strings keep their quotes, and <code>HH:MM</code> values are no longer misread as sexagesimal integers.
+                (<a href="https://github.com/bitbonsai/mcpvault/issues/77" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-2 transition-colors">#77</a>)
+              </li>
               <li>
                 <span class="font-medium text-foreground">v0.11.0 (March 2026):</span> New <code>list_all_tags</code> tool scans the vault for all frontmatter tags and inline <code>#hashtags</code> with occurrence counts. Obsidian skill now routes to CLI for active file, daily notes, backlinks, and open-in-editor.
                 (<a href="https://github.com/bitbonsai/mcpvault/issues/80" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-2 transition-colors">#80</a>)

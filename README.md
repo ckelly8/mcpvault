@@ -595,7 +595,8 @@ Delete a note from the vault (requires confirmation for safety).
   "name": "delete_note",
   "arguments": {
     "path": "old-draft.md",
-    "confirmPath": "old-draft.md"
+    "confirmPath": "old-draft.md",
+    "trashMode": "local"
   }
 }
 ```
@@ -606,9 +607,14 @@ Delete a note from the vault (requires confirmation for safety).
 {
   "success": true,
   "path": "old-draft.md",
-  "message": "Successfully deleted note: old-draft.md. This action cannot be undone."
+  "message": "Successfully moved note to vault trash: old-draft.md"
 }
 ```
+
+**Trash modes:**
+- `none` (default): permanent delete
+- `local`: move to `.trash` inside the vault, preserving folder structure
+- `system`: move to the OS trash/recycle bin
 
 **Response (Confirmation Failed):**
 

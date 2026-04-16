@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.2] - 2026-04-16
+
+### Added
+- `delete_note` now supports soft-delete via `trashMode` parameter ([#91](https://github.com/bitbonsai/mcpvault/issues/91))
+  - `none` (default): permanent delete (previous behavior)
+  - `local`: move file to `.trash/` inside the vault, preserving relative folder structure
+  - `system`: move file to OS trash/recycle bin via the `trash` package
+
 ## [0.11.1] - 2026-04-16
 
 ### Fixed

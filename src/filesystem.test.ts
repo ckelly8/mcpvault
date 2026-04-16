@@ -543,6 +543,47 @@ test("handle directory deletion attempt", async () => {
   expect(result.message).toContain("is not a file");
 });
 
+test("delete note with local trash mode", async () => {
+  const testPath = "trash-test.md";
+  const content = "# Trash Test\n\nThis note should be moved to vault trash.";
+
+  await writeFile(join(testVaultPath, testPath), content);
+
+  const result = await fileSystem.deleteNote({
+    path: testPath,
+    confirmPath: testPath,
+    trashMode: 'local'
+  });
+
+  expect(result.success).toBe(true);
+  expect(result.message).toContain("vault trash");
+
+  const originalExists = await fileSystem.exists(testPath);
+  expect(originalExists).toBe(false);
+
+  const trashedExists = await fileSystem.exists(".trash/trash-test.md");
+  expect(trashedExists).toBe(true);
+});
+
+test("delete note with system trash mode", async () => {
+  const testPath = "system-trash-test.md";
+  const content = "# System Trash Test\n\nThis note should be moved to system trash.";
+
+  await writeFile(join(testVaultPath, testPath), content);
+
+  const result = await fileSystem.deleteNote({
+    path: testPath,
+    confirmPath: testPath,
+    trashMode: 'system'
+  });
+
+  expect(result.success).toBe(true);
+  expect(result.message).toContain("system trash");
+
+  const originalExists = await fileSystem.exists(testPath);
+  expect(originalExists).toBe(false);
+});
+
 test("delete note with frontmatter", async () => {
   const testPath = "note-with-frontmatter.md";
   const content = `---
