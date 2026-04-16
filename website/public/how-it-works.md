@@ -25,7 +25,7 @@ Practical prompts you can try with your AI assistant and MCPVault.
 
 1. AI calls `update_frontmatter` for each project note
 2. Sets status to "completed" and adds completion date
-3. Frontmatter is safely merged with existing fields
+3. Frontmatter is safely merged with existing fields; unmodified keys keep their raw formatting
 
 **Example request:**
 ```json

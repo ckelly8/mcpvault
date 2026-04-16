@@ -8,7 +8,7 @@ Designed for safety, performance, and developer experience. Every feature gives 
 Fast full-text search across your entire vault with multi-word matching and BM25 relevance ranking. AI can locate notes by name, content, tags, or metadata instantly.
 
 ### Safe Frontmatter Handling
-YAML parser validates and preserves formatting, ensuring safe atomic updates to note metadata.
+AST-aware YAML updates preserve raw formatting for unmodified fields. Dates, quotes, and time values keep their original form while only changed keys are rewritten.
 
 ### File Operations
 Read, write, and manage notes safely. Create, update, and organize your vault with AI assistance.
@@ -41,7 +41,7 @@ Works with Claude Desktop, ChatGPT+ Desktop, OpenCode, Gemini CLI, OpenAI Codex,
 | Setup Complexity | Simple - just point to vault path | Complex - requires Obsidian plugin + API key | Variable |
 | Obsidian Running Required | No | Yes | No |
 | Plugin Dependencies | None | Required (Local REST API plugin) | None |
-| Frontmatter Safety | Protected (advanced YAML parsing) | API-dependent | Can corrupt |
+| Frontmatter Safety | Protected (AST-aware, preserves unmodified fields) | API-dependent | Can corrupt |
 | Built-in Search | Advanced (full-text + BM25 ranking) | Good (via Obsidian API) | None |
 | Performance | Fast (optimized with batch I/O) | API overhead | Variable |
 | Link Handling | Safe (preserves content/frontmatter on move) | Good | Breaks links |

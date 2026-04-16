@@ -122,7 +122,7 @@ MCP is an open protocol. You're not tied to any specific vendor or platform. You
 
 ## Features
 
-- ✅ Safe frontmatter parsing and validation using gray-matter
+- ✅ Safe frontmatter parsing and validation using gray-matter with AST-aware updates that preserve raw formatting for unmodified fields
 - ✅ Path filtering to exclude `.obsidian` directory and other system files
 - ✅ **Complete MCP toolkit**: 14 methods covering all vault operations
   - File operations: `read_note`, `write_note`, `patch_note`, `delete_note`, `move_note`, `move_file`

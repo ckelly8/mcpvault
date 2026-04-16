@@ -65,7 +65,7 @@ See how AI assistants intelligently interact with your Obsidian vault. These exa
 }
 ```
 
-**Result:** YAML frontmatter safely updated. Existing fields preserved. Note content untouched.
+**Result:** YAML frontmatter safely updated. Existing fields preserved with original formatting. Note content untouched.
 
 ## Search Content (search_notes)
 

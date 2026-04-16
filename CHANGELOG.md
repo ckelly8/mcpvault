@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] - 2026-04-16
+
+### Fixed
+- Frontmatter updates now use AST-aware YAML preservation. Unmodified fields keep their original formatting, fixing:
+  - `YYYY-MM-DD` dates being rewritten as full ISO timestamps ([#77](https://github.com/bitbonsai/mcpvault/issues/77))
+  - `HH:MM` values being parsed as YAML 1.1 sexagesimal integers ([#75](https://github.com/bitbonsai/mcpvault/issues/75))
+  - Quoted strings losing their quote style ([#76](https://github.com/bitbonsai/mcpvault/issues/76))
+
+### Changed
+- `update_frontmatter`, `manage_tags`, and `write_note` (append/prepend modes) now preserve raw YAML for unmodified fields via `yaml.parseDocument`
+
 ## [0.11.0] - 2026-03-22
 
 ### Added
