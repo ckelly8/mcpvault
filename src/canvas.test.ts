@@ -67,6 +67,9 @@ test("addNode creates a text node and returns it with a generated id", async () 
   expect(node.width).toBe(250); // default
   expect(node.height).toBe(60); // default
   expect(node.id).toMatch(/^[0-9a-f]{16}$/);
+  const reread = await svc.read("c.canvas");
+  expect(reread.nodes).toHaveLength(1);
+  expect(reread.nodes[0].id).toBe(node.id);
 });
 
 test("addNode applies explicit width and height", async () => {
@@ -117,6 +120,8 @@ test("updateNode changes position and persists to file", async () => {
   expect(updated.y).toBe(88);
   const reread = await svc.read("c.canvas");
   expect(reread.nodes[0].x).toBe(99);
+  expect((reread.nodes[0] as any).text).toBe("hello"); // original text preserved
+  expect(reread.nodes[0].width).toBe(250);             // original width preserved
 });
 
 test("updateNode throws for unknown node id", async () => {
