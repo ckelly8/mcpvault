@@ -120,6 +120,9 @@ Thumbs.db
 # Claude Code settings
 .claude/settings.local.json
 
+# Internal design docs (not for public repo)
+docs/superpowers/
+
 # Bun
 bun.lockb
 
