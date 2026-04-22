@@ -26,7 +26,7 @@ test("createServer returns a Server instance", () => {
   expect(typeof server.connect).toBe("function");
 });
 
-test("server registers 15 tools", async () => {
+test("server registers 27 tools", async () => {
   const server = createServer(testVaultPath, { version: "1.0.0" });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 
@@ -38,16 +38,28 @@ test("server registers 15 tools", async () => {
   ]);
 
   const result = await client.listTools();
-  expect(result.tools).toHaveLength(15);
+  expect(result.tools).toHaveLength(27);
 
   const toolNames = result.tools.map((t) => t.name).sort();
   expect(toolNames).toEqual([
+    "base_add_view",
+    "base_read",
+    "base_remove_view",
+    "base_update_view",
+    "base_write",
+    "canvas_add_edge",
+    "canvas_add_node",
+    "canvas_read",
+    "canvas_remove_edge",
+    "canvas_remove_node",
+    "canvas_update_node",
     "delete_note",
     "get_frontmatter",
     "get_notes_info",
     "get_vault_stats",
     "list_all_tags",
     "list_directory",
+    "list_vault_entities",
     "manage_tags",
     "move_file",
     "move_note",

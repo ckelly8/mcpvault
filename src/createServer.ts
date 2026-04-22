@@ -8,6 +8,8 @@ import { FrontmatterHandler, parseFrontmatter } from "./frontmatter.js";
 import { PathFilter } from "./pathfilter.js";
 import { SearchService } from "./search.js";
 import { resolve } from "path";
+import { CanvasService } from "./canvas.js";
+import { BaseService } from "./base.js";
 
 export interface CreateServerOptions {
   name?: string;
@@ -27,6 +29,8 @@ export function createServer(vaultPath: string, options: CreateServerOptions = {
   const resolvedVaultPath = resolve(vaultPath);
   const fileSystem = new FileSystemService(resolvedVaultPath, pathFilter, frontmatterHandler);
   const searchService = new SearchService(resolvedVaultPath, pathFilter);
+  const canvasService = new CanvasService(resolvedVaultPath);
+  const baseService = new BaseService(resolvedVaultPath);
 
   const server = new Server({ name, version }, {
     capabilities: { tools: {} },
@@ -228,6 +232,176 @@ export function createServer(vaultPath: string, options: CreateServerOptions = {
             }
           }
         }
+        ,{
+          name: "canvas_read",
+          description: "Read a Canvas file and return its nodes, edges, and counts",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file relative to vault root" },
+              prettyPrint: { type: "boolean", description: "Format JSON response with indentation (default: false)", default: false }
+            },
+            required: ["path"]
+          }
+        },
+        {
+          name: "canvas_add_node",
+          description: "Add a node to a Canvas file. Types: text (requires text), file (requires file path), group (optional label), link (requires url).",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file" },
+              type: { type: "string", enum: ["text", "file", "group", "link"], description: "Node type" },
+              x: { type: "number", description: "X position" },
+              y: { type: "number", description: "Y position" },
+              width: { type: "number", description: "Width in pixels (default: 250 for text, 400 for others)" },
+              height: { type: "number", description: "Height in pixels (default: 60 for text, 400 for file/group, 300 for link)" },
+              color: { type: "string", description: "Node color (optional)" },
+              text: { type: "string", description: "Text content (required for text nodes)" },
+              file: { type: "string", description: "Vault-relative file path (required for file nodes)" },
+              label: { type: "string", description: "Group label (optional, for group nodes)" },
+              url: { type: "string", description: "URL (required for link nodes)" }
+            },
+            required: ["path", "type", "x", "y"]
+          }
+        },
+        {
+          name: "canvas_update_node",
+          description: "Update fields of an existing Canvas node by its ID. Cannot change node type.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file" },
+              nodeId: { type: "string", description: "16-character hex node ID" },
+              x: { type: "number" },
+              y: { type: "number" },
+              width: { type: "number" },
+              height: { type: "number" },
+              color: { type: "string" },
+              text: { type: "string", description: "New text (text nodes only)" },
+              file: { type: "string", description: "New vault-relative path (file nodes only)" },
+              label: { type: "string", description: "New label (group nodes only)" },
+              url: { type: "string", description: "New URL (link nodes only)" }
+            },
+            required: ["path", "nodeId"]
+          }
+        },
+        {
+          name: "canvas_remove_node",
+          description: "Remove a node from a Canvas file by ID. Also removes all edges connected to that node.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file" },
+              nodeId: { type: "string", description: "16-character hex node ID to remove" }
+            },
+            required: ["path", "nodeId"]
+          }
+        },
+        {
+          name: "canvas_add_edge",
+          description: "Add an edge connecting two existing nodes in a Canvas file.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file" },
+              fromNode: { type: "string", description: "ID of the source node" },
+              toNode: { type: "string", description: "ID of the target node" },
+              fromSide: { type: "string", enum: ["top", "bottom", "left", "right"], description: "Side of source node to connect from (optional)" },
+              toSide: { type: "string", enum: ["top", "bottom", "left", "right"], description: "Side of target node to connect to (optional)" },
+              label: { type: "string", description: "Edge label (optional)" }
+            },
+            required: ["path", "fromNode", "toNode"]
+          }
+        },
+        {
+          name: "canvas_remove_edge",
+          description: "Remove an edge from a Canvas file by its ID.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .canvas file" },
+              edgeId: { type: "string", description: "16-character hex edge ID to remove" }
+            },
+            required: ["path", "edgeId"]
+          }
+        },
+        {
+          name: "base_read",
+          description: "Read an Obsidian Base file and return its views configuration.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .base file relative to vault root" },
+              prettyPrint: { type: "boolean", description: "Format JSON response with indentation (default: false)", default: false }
+            },
+            required: ["path"]
+          }
+        },
+        {
+          name: "base_write",
+          description: "Write a complete Base file with validation. Use for operations not covered by granular tools. Must include a views array where each view has type and name.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .base file" },
+              config: { type: "object", description: "Full base configuration object with views array" }
+            },
+            required: ["path", "config"]
+          }
+        },
+        {
+          name: "base_add_view",
+          description: "Add a new view to an Obsidian Base file.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .base file" },
+              type: { type: "string", enum: ["table", "board", "calendar", "gallery"], description: "View type" },
+              name: { type: "string", description: "Unique name for the view within this base" },
+              filters: { type: "object", description: "View filter configuration (optional)" },
+              columns: { type: "object", description: "View column configuration (optional)" }
+            },
+            required: ["path", "type", "name"]
+          }
+        },
+        {
+          name: "base_remove_view",
+          description: "Remove a view from an Obsidian Base file by name. Cannot remove the last view.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .base file" },
+              viewName: { type: "string", description: "Name of the view to remove" }
+            },
+            required: ["path", "viewName"]
+          }
+        },
+        {
+          name: "base_update_view",
+          description: "Update fields of an existing view in an Obsidian Base file by name.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Path to the .base file" },
+              viewName: { type: "string", description: "Name of the view to update" },
+              type: { type: "string", enum: ["table", "board", "calendar", "gallery"], description: "New view type (optional)" },
+              filters: { type: "object", description: "New filter configuration (optional, replaces existing)" },
+              columns: { type: "object", description: "New column configuration (optional, replaces existing)" }
+            },
+            required: ["path", "viewName"]
+          }
+        },
+        {
+          name: "list_vault_entities",
+          description: "List all vault entities as a typed tree showing .md, .canvas, and .base files with type labels. Respects vault ignore rules.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              path: { type: "string", description: "Subdirectory to scope listing to (default: vault root)", default: "" }
+            }
+          }
+        }
       ]
     };
   });
@@ -402,6 +576,104 @@ export function createServer(vaultPath: string, options: CreateServerOptions = {
           return {
             content: [{ type: "text", text: JSON.stringify(tags, null, indent) }]
           };
+        }
+
+        case "canvas_read": {
+          const data = await canvasService.read(trimmedArgs.path);
+          const indent = trimmedArgs.prettyPrint ? 2 : undefined;
+          return { content: [{ type: "text", text: JSON.stringify(data, null, indent) }] };
+        }
+
+        case "canvas_add_node": {
+          const node = await canvasService.addNode(trimmedArgs.path, {
+            type: trimmedArgs.type,
+            x: trimmedArgs.x,
+            y: trimmedArgs.y,
+            width: trimmedArgs.width,
+            height: trimmedArgs.height,
+            color: trimmedArgs.color,
+            text: trimmedArgs.text,
+            file: trimmedArgs.file,
+            label: trimmedArgs.label,
+            url: trimmedArgs.url,
+          });
+          return { content: [{ type: "text", text: JSON.stringify(node, null, 2) }] };
+        }
+
+        case "canvas_update_node": {
+          const node = await canvasService.updateNode(trimmedArgs.path, trimmedArgs.nodeId, {
+            x: trimmedArgs.x,
+            y: trimmedArgs.y,
+            width: trimmedArgs.width,
+            height: trimmedArgs.height,
+            color: trimmedArgs.color,
+            text: trimmedArgs.text,
+            file: trimmedArgs.file,
+            label: trimmedArgs.label,
+            url: trimmedArgs.url,
+          });
+          return { content: [{ type: "text", text: JSON.stringify(node, null, 2) }] };
+        }
+
+        case "canvas_remove_node": {
+          await canvasService.removeNode(trimmedArgs.path, trimmedArgs.nodeId);
+          return { content: [{ type: "text", text: `Successfully removed node '${trimmedArgs.nodeId}' from ${trimmedArgs.path}` }] };
+        }
+
+        case "canvas_add_edge": {
+          const edge = await canvasService.addEdge(trimmedArgs.path, {
+            fromNode: trimmedArgs.fromNode,
+            toNode: trimmedArgs.toNode,
+            fromSide: trimmedArgs.fromSide,
+            toSide: trimmedArgs.toSide,
+            label: trimmedArgs.label,
+          });
+          return { content: [{ type: "text", text: JSON.stringify(edge, null, 2) }] };
+        }
+
+        case "canvas_remove_edge": {
+          await canvasService.removeEdge(trimmedArgs.path, trimmedArgs.edgeId);
+          return { content: [{ type: "text", text: `Successfully removed edge '${trimmedArgs.edgeId}' from ${trimmedArgs.path}` }] };
+        }
+
+        case "base_read": {
+          const data = await baseService.read(trimmedArgs.path);
+          const indent = trimmedArgs.prettyPrint ? 2 : undefined;
+          return { content: [{ type: "text", text: JSON.stringify(data, null, indent) }] };
+        }
+
+        case "base_write": {
+          await baseService.write(trimmedArgs.path, trimmedArgs.config);
+          return { content: [{ type: "text", text: `Successfully wrote base: ${trimmedArgs.path}` }] };
+        }
+
+        case "base_add_view": {
+          const view = await baseService.addView(trimmedArgs.path, {
+            type: trimmedArgs.type,
+            name: trimmedArgs.name,
+            filters: trimmedArgs.filters,
+            columns: trimmedArgs.columns,
+          });
+          return { content: [{ type: "text", text: JSON.stringify(view, null, 2) }] };
+        }
+
+        case "base_remove_view": {
+          await baseService.removeView(trimmedArgs.path, trimmedArgs.viewName);
+          return { content: [{ type: "text", text: `Successfully removed view '${trimmedArgs.viewName}' from ${trimmedArgs.path}` }] };
+        }
+
+        case "base_update_view": {
+          const view = await baseService.updateView(trimmedArgs.path, trimmedArgs.viewName, {
+            ...(trimmedArgs.type !== undefined && { type: trimmedArgs.type }),
+            ...(trimmedArgs.filters !== undefined && { filters: trimmedArgs.filters }),
+            ...(trimmedArgs.columns !== undefined && { columns: trimmedArgs.columns }),
+          });
+          return { content: [{ type: "text", text: JSON.stringify(view, null, 2) }] };
+        }
+
+        case "list_vault_entities": {
+          const tree = await fileSystem.listVaultEntities(trimmedArgs.path || '');
+          return { content: [{ type: "text", text: tree }] };
         }
 
         default:
