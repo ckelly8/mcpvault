@@ -60,6 +60,12 @@ test("write throws for missing views array", async () => {
     .rejects.toThrow("missing views array");
 });
 
+test("write creates a new file when it does not exist", async () => {
+  await svc.write("new.base", { views: [{ type: "table", name: "Fresh" }] });
+  const result = await svc.read("new.base");
+  expect(result.views[0].name).toBe("Fresh");
+});
+
 // addView
 test("addView appends a new view", async () => {
   await writeFile(join(testVaultPath, "test.base"), SIMPLE_BASE);
@@ -110,6 +116,9 @@ test("updateView deep-merges partial fields", async () => {
   const updated = await svc.updateView("test.base", "Table", { type: "gallery" });
   expect(updated.type).toBe("gallery");
   expect(updated.name).toBe("Table");
+  const persisted = await svc.read("test.base");
+  expect(persisted.views[0].type).toBe("gallery");
+  expect(persisted.views[0].name).toBe("Table");
 });
 
 test("updateView throws for unknown view name", async () => {
