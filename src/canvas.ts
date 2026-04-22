@@ -167,7 +167,7 @@ export class CanvasService {
     const data = await this.load(path);
     const idx = data.nodes.findIndex(n => n.id === nodeId);
     if (idx === -1) throw new Error(`Node '${nodeId}' not found in ${path}`);
-    const updated = { ...data.nodes[idx], ...omitUndefined(params) } as CanvasNode;
+    const updated = { ...data.nodes[idx], ...omitUndefined(params as Record<string, unknown>) } as CanvasNode;
     const nodes = [...data.nodes];
     nodes[idx] = updated;
     await this.save(path, { ...data, nodes });

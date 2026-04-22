@@ -1069,8 +1069,7 @@ export class FileSystemService {
         return a.name.localeCompare(b.name);
       });
 
-    for (let i = 0; i < allowed.length; i++) {
-      const entry = allowed[i];
+    for (const [i, entry] of allowed.entries()) {
       const isLast = i === allowed.length - 1;
       const connector = isLast ? '└── ' : '├── ';
       const childPrefix = prefix + (isLast ? '    ' : '│   ');

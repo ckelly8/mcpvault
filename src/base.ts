@@ -118,7 +118,7 @@ export class BaseService {
     if (partialUpdate.type !== undefined && !VALID_VIEW_TYPES.has(partialUpdate.type)) {
       throw new Error(`Invalid view type: ${partialUpdate.type}. Must be table, board, calendar, or gallery`);
     }
-    const updated: BaseView = { ...data.views[idx], ...partialUpdate };
+    const updated = { ...data.views[idx], ...partialUpdate } as BaseView;
     const views = [...data.views];
     views[idx] = updated;
     await this.save(path, { ...data, views });
