@@ -1081,6 +1081,7 @@ export class FileSystemService {
         await this.walkForEntities(entryRelPath, lines, childPrefix);
       } else if (entry.isFile() && this.pathFilter.isAllowed(entryRelPath)) {
         const ext = entry.name.slice(entry.name.lastIndexOf('.') + 1).toLowerCase();
+        if (ext !== 'md' && ext !== 'canvas' && ext !== 'base') continue;
         const label = ext === 'canvas' ? '[canvas]' : ext === 'base' ? '[base]  ' : '[md]    ';
         lines.push(`${prefix}${connector}${label}  ${entry.name}`);
       }
