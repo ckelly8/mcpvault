@@ -1413,3 +1413,31 @@ test("listAllTags skips system directories", async () => {
   expect(tags).toHaveLength(1);
   expect(tags[0]?.tag).toBe("visible");
 });
+
+test("listVaultEntities returns typed tree string for vault root", async () => {
+  await mkdir(join(testVaultPath, "sub"), { recursive: true });
+  await writeFile(join(testVaultPath, "note.md"), "# Hello");
+  await writeFile(join(testVaultPath, "board.canvas"), JSON.stringify({ nodes: [], edges: [] }));
+  await writeFile(join(testVaultPath, "data.base"), "views:\n  - type: table\n    name: Table\n");
+  await writeFile(join(testVaultPath, "sub", "child.md"), "# Child");
+
+  const result = await fileSystem.listVaultEntities();
+  expect(result).toContain("[canvas]");
+  expect(result).toContain("[base]");
+  expect(result).toContain("[md]");
+  expect(result).toContain("board.canvas");
+  expect(result).toContain("data.base");
+  expect(result).toContain("note.md");
+  expect(result).toContain("sub/");
+  expect(result).toContain("child.md");
+});
+
+test("listVaultEntities scopes to a subdirectory", async () => {
+  await mkdir(join(testVaultPath, "sub"), { recursive: true });
+  await writeFile(join(testVaultPath, "root.md"), "root");
+  await writeFile(join(testVaultPath, "sub", "child.md"), "child");
+
+  const result = await fileSystem.listVaultEntities("sub");
+  expect(result).toContain("child.md");
+  expect(result).not.toContain("root.md");
+});

@@ -1041,4 +1041,49 @@ export class FileSystemService {
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
   }
+
+  async listVaultEntities(rootPath: string = ''): Promise<string> {
+    const header = rootPath ? `${rootPath}/` : '/';
+    const lines: string[] = [header];
+    await this.walkForEntities(rootPath, lines, '');
+    return lines.join('\n');
+  }
+
+  private async walkForEntities(dirRelPath: string, lines: string[], prefix: string): Promise<void> {
+    const fullPath = this.resolvePath(dirRelPath);
+    let entries;
+    try {
+      entries = await readdir(fullPath, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    const allowed = entries
+      .filter(e => {
+        const rel = dirRelPath ? `${dirRelPath}/${e.name}` : e.name;
+        return this.pathFilter.isAllowedForListing(rel);
+      })
+      .sort((a, b) => {
+        if (a.isDirectory() && !b.isDirectory()) return -1;
+        if (!a.isDirectory() && b.isDirectory()) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+    for (let i = 0; i < allowed.length; i++) {
+      const entry = allowed[i];
+      const isLast = i === allowed.length - 1;
+      const connector = isLast ? '└── ' : '├── ';
+      const childPrefix = prefix + (isLast ? '    ' : '│   ');
+      const entryRelPath = dirRelPath ? `${dirRelPath}/${entry.name}` : entry.name;
+
+      if (entry.isDirectory()) {
+        lines.push(`${prefix}${connector}${entry.name}/`);
+        await this.walkForEntities(entryRelPath, lines, childPrefix);
+      } else if (entry.isFile() && this.pathFilter.isAllowed(entryRelPath)) {
+        const ext = entry.name.slice(entry.name.lastIndexOf('.') + 1).toLowerCase();
+        const label = ext === 'canvas' ? '[canvas]' : ext === 'base' ? '[base]  ' : '[md]    ';
+        lines.push(`${prefix}${connector}${label}  ${entry.name}`);
+      }
+    }
+  }
 }
